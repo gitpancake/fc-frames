@@ -1,35 +1,28 @@
-import { PollVoteForm } from "@/app/form";
+import { HitForm } from "@/app/form";
 import { NumHits } from "@/app/types";
 import { kv } from "@vercel/kv";
 import { Metadata, ResolvingMetadata } from "next";
 import Head from "next/head";
 
-async function getPoll(id: string): Promise<NumHits> {
-  let nullPoll = {
+async function getNumHits(id: string): Promise<NumHits> {
+  let nullHits = {
     id: "",
-    title: "No poll found",
-    option1: "",
-    option2: "",
-    option3: "",
-    option4: "",
-    votes1: 0,
-    votes2: 0,
-    votes3: 0,
-    votes4: 0,
+    title: "No hits found",
+    numHits: 0,
     created_at: 0,
   };
 
   try {
-    let poll: NumHits | null = await kv.hgetall(`poll:${id}`);
+    let numHits: NumHits | null = await kv.hgetall(`num_hits:${id}`);
 
-    if (!poll) {
-      return nullPoll;
+    if (!numHits) {
+      return nullHits;
     }
 
-    return poll;
+    return numHits;
   } catch (error) {
     console.error(error);
-    return nullPoll;
+    return nullHits;
   }
 }
 
@@ -41,14 +34,14 @@ type Props = {
 export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
   // read route params
   const id = params.id;
-  const poll = await getPoll(id);
+  const poll = await getNumHits(id);
 
   const fcMetadata: Record<string, string> = {
     "fc:frame": "vNext",
     "fc:frame:post_url": `${process.env["HOST"]}/api/vote?id=${id}`,
     "fc:frame:image": `${process.env["HOST"]}/api/image?id=${id}`,
   };
-  [poll.option1, poll.option2, poll.option3, poll.option4]
+  [poll.title]
     .filter((o) => o !== "")
     .map((option, index) => {
       fcMetadata[`fc:frame:button:${index + 1}`] = option;
@@ -77,13 +70,13 @@ function getMeta(poll: NumHits) {
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const poll = await getPoll(params.id);
+  const numHits = await getNumHits(params.id);
 
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-screen py-2">
         <main className="flex flex-col items-center justify-center flex-1 px-4 sm:px-20 text-center">
-          <PollVoteForm poll={poll} />
+          <HitForm numHits={numHits} />
         </main>
       </div>
     </>

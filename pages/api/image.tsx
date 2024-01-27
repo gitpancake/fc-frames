@@ -11,16 +11,16 @@ let fontData = fs.readFileSync(fontPath);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const pollId = req.query["id"];
+    const numHitsId = req.query["id"];
     // const fid = parseInt(req.query['fid']?.toString() || '')
-    if (!pollId) {
-      return res.status(400).send("Missing poll ID");
+    if (!numHitsId) {
+      return res.status(400).send("Missing Num Hits ID");
     }
 
-    let poll: NumHits | null = await kv.hgetall(`poll:${pollId}`);
+    let hits: NumHits | null = await kv.hgetall(`num_hits:${numHitsId}`);
 
-    if (!poll) {
-      return res.status(400).send("Missing poll ID");
+    if (!hits) {
+      return res.status(400).send("Missing  Num Hits ID");
     }
 
     const showResults = req.query["results"] === "true";
@@ -29,18 +29,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //     votedOption = await kv.hget(`poll:${pollId}:votes`, `${fid}`) as number
     // }
 
-    const pollOptions = [poll.option1, poll.option2, poll.option3, poll.option4].filter((option) => option !== "");
-    const totalVotes = pollOptions
+    const numHitsOptions = [hits.title].filter((option) => option !== "");
+
+    const totalVotes = numHitsOptions
       // @ts-ignore
-      .map((option, index) => parseInt(poll[`votes${index + 1}`]))
+      .map((_option, _index) => parseInt(hits[`numHits`]))
       .reduce((a, b) => a + b, 0);
     const pollData = {
-      question: showResults ? `Results for ${poll.title}` : poll.title,
-      options: pollOptions.map((option, index) => {
+      question: showResults ? `Results for ${hits.title}` : hits.title,
+      options: numHitsOptions.map((option, index) => {
         // @ts-ignore
-        const votes = poll[`votes${index + 1}`];
+        const votes = hits[`numHits`];
+
         const percentOfTotal = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
-        let text = showResults ? `${percentOfTotal}%: ${option} (${votes} votes)` : `${index + 1}. ${option}`;
+        let text = showResults ? `${percentOfTotal}%: ${option} (${votes} hits)` : `${index + 1}. ${option}`;
         return { option, votes, text, percentOfTotal };
       }),
     };
@@ -66,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             padding: 20,
           }}
         >
-          <h2 style={{ textAlign: "center", color: "lightgray" }}>{poll.title}</h2>
+          <h2 style={{ textAlign: "center", color: "lightgray" }}>{hits.title}</h2>
           {pollData.options.map((opt, index) => {
             return (
               <div

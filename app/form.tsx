@@ -2,9 +2,9 @@
 
 import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useOptimistic, useRef, useState, useTransition } from "react";
+import { useOptimistic, useRef, useTransition } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { giveHit, redirectToNumHits, saveNumHits } from "./actions";
+import { giveHit, saveNumHits } from "./actions";
 import { NumHits } from "./types";
 
 type NumHitsState = {
@@ -95,36 +95,21 @@ export function NumHitsCreateForm() {
   );
 }
 
-function PollOptions({ poll, onChange }: { poll: NumHits; onChange: (index: number) => void }) {
-  return (
-    <div className="mb-4 text-left">
-      {[poll.title]
-        .filter((e) => e !== "")
-        .map((option, index) => (
-          <label key={index} className="block">
-            <input type="radio" name="poll" value={option} onChange={() => onChange(index + 1)} className="mr-2" />
-            {option}
-          </label>
-        ))}
-    </div>
-  );
-}
-
 function PollResults({ poll }: { poll: NumHits }) {
   return (
     <div className="mb-4">
-      <img src={`/api/image?id=${poll.id}&results=true&date=${Date.now()}`} alt="poll results" />
+      <img src={`/api/image?id=${poll.id}&results=true&date=${Date.now()}`} alt="num hits" />
     </div>
   );
 }
 
-export function PollVoteForm({ poll, viewResults }: { poll: NumHits; viewResults?: boolean }) {
-  const [selectedOption, setSelectedOption] = useState(-1);
+export function HitForm({ numHits, viewResults }: { numHits: NumHits; viewResults?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   viewResults = true; // Only allow voting via the api
+
   let formRef = useRef<HTMLFormElement>(null);
-  let voteOnPoll = giveHit.bind(null, poll);
+  let voteOnPoll = giveHit.bind(null, numHits);
   let [isPending, startTransition] = useTransition();
   let [state, mutate] = useOptimistic({ showResults: viewResults }, function createReducer({ showResults }, state: NumHitsState) {
     if (state.voted || viewResults) {
@@ -138,48 +123,42 @@ export function PollVoteForm({ poll, viewResults }: { poll: NumHits; viewResults
     }
   });
 
-  const handleVote = (index: number) => {
-    setSelectedOption(index);
-  };
-
   return (
     <div className="max-w-sm rounded overflow-hidden shadow-lg p-4 m-4">
-      <div className="font-bold text-xl mb-2">{poll.title}</div>
+      <div className="font-bold text-xl mb-2">{numHits.title} </div>
       <form
         className="relative my-8"
         ref={formRef}
-        action={() => voteOnPoll(selectedOption)}
+        action={() => voteOnPoll()}
         onSubmit={(event) => {
           event.preventDefault();
-          let formData = new FormData(event.currentTarget);
-          let newPoll = {
-            ...poll,
+
+          let mutatedHits = {
+            ...numHits,
+            numHits: Number(numHits.numHits) + 1,
           };
 
-          // @ts-ignore
-          newPoll[`votes${selectedOption}`] += 1;
-
           formRef.current?.reset();
+
           startTransition(async () => {
             mutate({
-              newNumHits: newPoll,
+              newNumHits: mutatedHits,
               pending: false,
               voted: true,
             });
 
-            await redirectToNumHits();
-            // await votePoll(newPoll, selectedOption);
+            await voteOnPoll();
           });
         }}
       >
-        {state.showResults ? <PollResults poll={poll} /> : <PollOptions poll={poll} onChange={handleVote} />}
+        {state.showResults ? <PollResults poll={numHits} /> : <></>}
         {state.showResults ? (
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
             Back
           </button>
         ) : (
-          <button className={"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" + (selectedOption < 1 ? " cursor-not-allowed" : "")} type="submit" disabled={selectedOption < 1}>
-            Vote
+          <button className={"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"} type="submit">
+            {numHits.title}
           </button>
         )}
       </form>

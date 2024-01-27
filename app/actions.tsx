@@ -12,7 +12,7 @@ export async function saveNumHits(numhits: NumHits, formData: FormData) {
     title: formData.get("title") as string,
   };
 
-  await kv.hset(`num_hits:${numhits.id}`, numhits);
+  await kv.hset(`num_hits:${numhits.id}`, newNumHits);
   await kv.zadd("num_hits_by_date", {
     score: Number(numhits.created_at),
     member: newNumHits.id,
@@ -22,8 +22,8 @@ export async function saveNumHits(numhits: NumHits, formData: FormData) {
   redirect(`/num_hits/${numhits.id}`);
 }
 
-export async function giveHit(numHits: NumHits, optionIndex: number) {
-  await kv.hincrby(`num_hit:${numHits.id}`, `numHits${optionIndex}`, 1);
+export async function giveHit(numHits: NumHits) {
+  await kv.hincrby(`num_hits:${numHits.id}`, `numHits`, 1);
 
   revalidatePath(`/num_hits/${numHits.id}`);
   redirect(`/num_hits/${numHits.id}?results=true`);

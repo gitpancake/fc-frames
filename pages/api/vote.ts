@@ -11,14 +11,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Process the vote
     // For example, let's assume you receive an option in the body
     try {
-      const pollId = req.query["id"];
+      const numHitsId = req.query["id"];
       const results = req.query["results"] === "true";
       let voted = req.query["voted"] === "true";
-      if (!pollId) {
-        return res.status(400).send("Missing poll ID");
+
+      if (!numHitsId) {
+        return res.status(400).send("Missing num hits ID");
       }
 
       let validatedMessage: Message | undefined = undefined;
+
       try {
         const frameMessage = Message.decode(Buffer.from(req.body?.trustedData?.messageBytes || "", "hex"));
         const result = await client.validateMessage(frameMessage);
@@ -31,29 +33,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const buttonId = validatedMessage?.data?.frameActionBody?.buttonIndex || 0;
       const fid = validatedMessage?.data?.fid || 0;
-      const votedOption = await kv.hget(`poll:${pollId}:votes`, `${fid}`);
+      const votedOption = await kv.hget(`num_hits:${numHitsId}:votes`, `${fid}`);
       voted = voted || !!votedOption;
 
       if (buttonId > 0 && buttonId < 5 && !results && !voted) {
         let multi = kv.multi();
-        multi.hincrby(`poll:${pollId}`, `votes${buttonId}`, 1);
-        multi.hset(`poll:${pollId}:votes`, { [fid]: buttonId });
+        multi.hincrby(`num_hits:${numHitsId}`, `numHits`, 1);
         await multi.exec();
       }
 
-      let poll: NumHits | null = await kv.hgetall(`poll:${pollId}`);
+      let numHits: NumHits | null = await kv.hgetall(`num_hits:${numHitsId}`);
 
-      if (!poll) {
-        return res.status(400).send("Missing poll ID");
+      if (!numHits) {
+        return res.status(400).send("Missing num hits ID");
       }
-      const imageUrl = `${process.env["HOST"]}/api/image?id=${poll.id}&results=${results ? "false" : "true"}&date=${Date.now()}${fid > 0 ? `&fid=${fid}` : ""}`;
-      let button1Text = "View Results";
+
+      const imageUrl = `${process.env["HOST"]}/api/image?id=${numHits.id}&results=${results ? "false" : "true"}&date=${Date.now()}${fid > 0 ? `&fid=${fid}` : ""}`;
+      let button1Text = `View all ${numHits.title}`;
+
       if (!voted && !results) {
-        button1Text = "Back";
+        button1Text = numHits.title;
       } else if (voted && !results) {
-        button1Text = "Already Voted";
+        button1Text = `Already said ${numHits.title}`;
       } else if (voted && results) {
-        button1Text = "View Results";
+        button1Text = `View all ${numHits.title}`;
       }
 
       // Return an HTML response
@@ -62,16 +65,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Vote Recorded</title>
-          <meta property="og:title" content="Vote Recorded">
+          <title>${numHits.title} recorded</title>
+          <meta property="og:title" content="${numHits.title} recorded">
           <meta property="og:image" content="${imageUrl}">
           <meta name="fc:frame" content="vNext">
           <meta name="fc:frame:image" content="${imageUrl}">
-          <meta name="fc:frame:post_url" content="${process.env["HOST"]}/api/vote?id=${poll.id}&voted=true&results=${results ? "false" : "true"}">
+          <meta name="fc:frame:post_url" content="${process.env["HOST"]}/api/vote?id=${numHits.id}&voted=true&results=${results ? "false" : "true"}">
           <meta name="fc:frame:button:1" content="${button1Text}">
         </head>
         <body>
-          <p>${results || voted ? `You have already voted ${votedOption}` : `Your vote for ${buttonId} has been recorded for fid ${fid}.`}</p>
+          <p>${results || voted ? `You have already said ${numHits.title}` : `Your ${numHits.title} has been recorded for fid ${fid}.`}</p>
         </body>
       </html>
     `);
