@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             alignItems: "center",
           }}
         >
-          <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "150px", marginBottom: 0, marginTop: 0 }}>{hits.title}</h3>
+          <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "150px", marginBottom: 0, marginTop: 0 }}>{totalVotes === 69 ? "Naughty" : hits.title}</h3>
           <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "190px", marginBottom: 0, marginTop: 0 }}>{totalVotes}</h3>
         </div>
       </div>,
