@@ -6,7 +6,7 @@ import { join } from "path";
 import satori from "satori";
 import sharp from "sharp";
 
-const fontPath = join(process.cwd(), "Roboto-Regular.ttf");
+const fontPath = join(process.cwd(), "Black Canvas.otf");
 let fontData = fs.readFileSync(fontPath);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -38,21 +38,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           display: "flex",
           width: "100%",
           height: "100%",
-          backgroundColor: "f4f4f4",
+          backgroundColor: "#fff",
           padding: 50,
-          lineHeight: 1.2,
-          fontSize: 24,
         }}
       >
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            padding: 20,
+            alignItems: "center",
           }}
         >
-          <h2 style={{ textAlign: "center", color: "#ff14ff" }}>{hits.title}</h2>
-          <h3 style={{ textAlign: "center", color: "#00ff00" }}>{totalVotes}</h3>
+          <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "190px", marginBottom: 0, marginTop: 0 }}>{hits.title}</h3>
+          <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "190px", marginBottom: 0, marginTop: 0 }}>{totalVotes}</h3>
         </div>
       </div>,
       {
@@ -61,9 +59,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         fonts: [
           {
             data: fontData,
-            name: "Roboto",
+            name: "Black Canvas",
             style: "normal",
-            weight: 400,
+            weight: 200,
           },
         ],
       }
