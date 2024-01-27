@@ -2,7 +2,6 @@ import { HitForm } from "@/app/form";
 import { NumHits } from "@/app/types";
 import { kv } from "@vercel/kv";
 import { Metadata, ResolvingMetadata } from "next";
-import Head from "next/head";
 
 async function getNumHits(id: string): Promise<NumHits> {
   let nullHits = {
@@ -58,15 +57,6 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
     },
     metadataBase: new URL(process.env["HOST"] || ""),
   };
-}
-function getMeta(poll: NumHits) {
-  // This didn't work for some reason
-  return (
-    <Head>
-      <meta property="og:image" content="" key="test"></meta>
-      <meta property="og:title" content="My page title" key="title" />
-    </Head>
-  );
 }
 
 export default async function Page({ params }: { params: { id: string } }) {

@@ -1,10 +1,9 @@
 "use client";
 
 import clsx from "clsx";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useOptimistic, useRef, useTransition } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { giveHit, saveNumHits } from "./actions";
+import { giveHit, redirectToNumHits, saveNumHits } from "./actions";
 import { NumHits } from "./types";
 
 type NumHitsState = {
@@ -104,8 +103,6 @@ function PollResults({ poll }: { poll: NumHits }) {
 }
 
 export function HitForm({ numHits, viewResults }: { numHits: NumHits; viewResults?: boolean }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   viewResults = false; // Only allow voting via the api
 
   let formRef = useRef<HTMLFormElement>(null);
@@ -147,7 +144,8 @@ export function HitForm({ numHits, viewResults }: { numHits: NumHits; viewResult
               voted: true,
             });
 
-            await voteOnPoll();
+            await redirectToNumHits();
+            //await voteOnPoll();
           });
         }}
       >

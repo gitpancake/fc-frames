@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           display: "flex",
           width: "100%",
           height: "100%",
-          backgroundColor: "#fff",
+          backgroundColor: "#8BF31B",
           padding: 50,
         }}
       >
@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             alignItems: "center",
           }}
         >
-          <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "190px", marginBottom: 0, marginTop: 0 }}>{hits.title}</h3>
+          <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "150px", marginBottom: 0, marginTop: 0 }}>{hits.title}</h3>
           <h3 style={{ textAlign: "center", color: "#CE2C97", fontSize: "190px", marginBottom: 0, marginTop: 0 }}>{totalVotes}</h3>
         </div>
       </div>,
