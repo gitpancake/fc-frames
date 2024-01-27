@@ -23,29 +23,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).send("Missing  Num Hits ID");
     }
 
-    const showResults = req.query["results"] === "true";
-    // let votedOption: number | null = null
-    // if (showResults && fid > 0) {
-    //     votedOption = await kv.hget(`poll:${pollId}:votes`, `${fid}`) as number
-    // }
-
     const numHitsOptions = [hits.title].filter((option) => option !== "");
 
     const totalVotes = numHitsOptions
       // @ts-ignore
       .map((_option, _index) => parseInt(hits[`numHits`]))
       .reduce((a, b) => a + b, 0);
-    const pollData = {
-      question: showResults ? `Results for ${hits.title}` : hits.title,
-      options: numHitsOptions.map((option, index) => {
-        // @ts-ignore
-        const votes = hits[`numHits`];
-
-        const percentOfTotal = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
-        let text = showResults ? `${percentOfTotal}%: ${option} (${votes} hits)` : `${index + 1}. ${option}`;
-        return { option, votes, text, percentOfTotal };
-      }),
-    };
 
     const svg = await satori(
       <div
@@ -68,26 +51,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             padding: 20,
           }}
         >
-          <h2 style={{ textAlign: "center", color: "lightgray" }}>{hits.title}</h2>
-          {pollData.options.map((opt, index) => {
-            return (
-              <div
-                style={{
-                  backgroundColor: showResults ? "#007bff" : "",
-                  color: "#fff",
-                  padding: 10,
-                  marginBottom: 10,
-                  borderRadius: 4,
-                  width: `${showResults ? opt.percentOfTotal : 100}%`,
-                  whiteSpace: "nowrap",
-                  overflow: "visible",
-                }}
-              >
-                {opt.text}
-              </div>
-            );
-          })}
-          {/*{showResults ? <h3 style={{color: "darkgray"}}>Total votes: {totalVotes}</h3> : ''}*/}
+          <h2 style={{ textAlign: "center", color: "#ff14ff" }}>{hits.title}</h2>
+          <h3 style={{ textAlign: "center", color: "#00ff00" }}>{totalVotes}</h3>
         </div>
       </div>,
       {

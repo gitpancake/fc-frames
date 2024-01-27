@@ -157,7 +157,7 @@ export function HitForm({ numHits, viewResults }: { numHits: NumHits; viewResult
             Back
           </button>
         ) : (
-          <button className={"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"} type="submit">
+          <button className={"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"} type="submit" disabled={false}>
             {numHits.title}
           </button>
         )}
