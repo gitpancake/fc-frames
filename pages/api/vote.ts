@@ -31,14 +31,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).send(`Failed to validate message: ${e}`);
       }
 
-      const buttonId = validatedMessage?.data?.frameActionBody?.buttonIndex || 0;
       const fid = validatedMessage?.data?.fid || 0;
-      const votedOption = await kv.hget(`num_hits:${numHitsId}:votes`, `${fid}`);
-      voted = voted || !!votedOption;
+      const alreadyVoted = await kv.get(`num_hits:${numHitsId}:votes:${fid}`);
+      voted = voted || !!alreadyVoted;
 
-      if (buttonId > 0 && buttonId < 5 && !results && !voted) {
+      if (!results && !voted) {
         let multi = kv.multi();
         multi.hincrby(`num_hits:${numHitsId}`, `numHits`, 1);
+        multi.set(`num_hits:${numHitsId}:votes:${fid}`, true);
         await multi.exec();
       }
 
