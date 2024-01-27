@@ -2,36 +2,33 @@
 
 import { kv } from "@vercel/kv";
 import { revalidatePath } from "next/cache";
-import {Poll} from "./types";
-import {redirect} from "next/navigation";
+import { redirect } from "next/navigation";
+import { NumHits } from "./types";
 
-export async function savePoll(poll: Poll, formData: FormData) {
-  let newPoll = {
-    ...poll,
+export async function saveNumHits(numhits: NumHits, formData: FormData) {
+  let newNumHits = {
+    ...numhits,
     created_at: Date.now(),
     title: formData.get("title") as string,
-    option1: formData.get("option1") as string,
-    option2: formData.get("option2") as string,
-    option3: formData.get("option3") as string,
-    option4: formData.get("option4") as string,
-  }
-  await kv.hset(`poll:${poll.id}`, poll);
-  await kv.zadd("polls_by_date", {
-    score: Number(poll.created_at),
-    member: newPoll.id,
+  };
+
+  await kv.hset(`num_hits:${numhits.id}`, numhits);
+  await kv.zadd("num_hits_by_date", {
+    score: Number(numhits.created_at),
+    member: newNumHits.id,
   });
 
-  revalidatePath("/polls");
-  redirect(`/polls/${poll.id}`);
+  revalidatePath("/num_hits");
+  redirect(`/num_hits/${numhits.id}`);
 }
 
-export async function votePoll(poll: Poll, optionIndex: number) {
-  await kv.hincrby(`poll:${poll.id}`, `votes${optionIndex}`, 1);
+export async function giveHit(numHits: NumHits, optionIndex: number) {
+  await kv.hincrby(`num_hit:${numHits.id}`, `numHits${optionIndex}`, 1);
 
-  revalidatePath(`/polls/${poll.id}`);
-  redirect(`/polls/${poll.id}?results=true`);
+  revalidatePath(`/num_hits/${numHits.id}`);
+  redirect(`/num_hits/${numHits.id}?results=true`);
 }
 
-export async function redirectToPolls() {
-  redirect("/polls");
+export async function redirectToNumHits() {
+  redirect("/num_hits");
 }
