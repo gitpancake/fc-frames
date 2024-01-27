@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const svg = await satori(
       <div
         style={{
-          justifyContent: "flex-start",
+          justifyContent: "center",
           alignItems: "center",
           display: "flex",
           width: "100%",
