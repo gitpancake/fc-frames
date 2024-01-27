@@ -49,14 +49,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const imageUrl = `${process.env["HOST"]}/api/image?id=${numHits.id}&results=${results ? "false" : "true"}&date=${Date.now()}${fid > 0 ? `&fid=${fid}` : ""}`;
-      let button1Text = `View all ${numHits.title}`;
+      let button1Text = `u good`;
 
       if (!voted && !results) {
         button1Text = numHits.title;
       } else if (voted && !results) {
-        button1Text = `Already said ${numHits.title}`;
+        button1Text = `u good?`;
       } else if (voted && results) {
-        button1Text = `View all ${numHits.title}`;
+        button1Text = `u good`;
       }
 
       // Return an HTML response
