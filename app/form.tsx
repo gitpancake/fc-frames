@@ -106,7 +106,7 @@ function PollResults({ poll }: { poll: NumHits }) {
 export function HitForm({ numHits, viewResults }: { numHits: NumHits; viewResults?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  viewResults = true; // Only allow voting via the api
+  viewResults = false; // Only allow voting via the api
 
   let formRef = useRef<HTMLFormElement>(null);
   let voteOnPoll = giveHit.bind(null, numHits);
